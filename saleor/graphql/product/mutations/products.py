@@ -42,7 +42,6 @@ from ...core.types import SeoInput, Upload
 from ...core.types.common import CollectionError, ProductError
 from ...core.utils import (
     clean_seo_fields,
-    from_global_id_or_error,
     get_duplicated_values,
     validate_image_file,
     validate_slug_and_generate_if_needed,
@@ -334,7 +333,7 @@ class CollectionReorderProducts(BaseMutation):
 
     @classmethod
     def perform_mutation(cls, _root, info, collection_id, moves):
-        _type, pk = from_global_id_or_error(
+        pk = cls.get_global_id_or_error(
             collection_id, only_type=Collection, field="collection_id"
         )
 
@@ -358,7 +357,7 @@ class CollectionReorderProducts(BaseMutation):
 
         # Resolve the products
         for move_info in moves:
-            _type, product_pk = from_global_id_or_error(
+            product_pk = cls.get_global_id_or_error(
                 move_info.product_id, only_type=Product, field="moves"
             )
 
@@ -1206,7 +1205,7 @@ class ProductTypeDelete(ModelDeleteMutation):
     @traced_atomic_transaction()
     def perform_mutation(cls, _root, info, **data):
         node_id = data.get("id")
-        _type, product_type_pk = from_global_id_or_error(
+        product_type_pk = cls.get_global_id_or_error(
             node_id, only_type=ProductType, field="pk"
         )
         variants_pks = models.Product.objects.filter(
@@ -1499,7 +1498,7 @@ class ProductVariantReorder(BaseMutation):
 
     @classmethod
     def perform_mutation(cls, _root, info, product_id, moves):
-        _type, pk = from_global_id_or_error(product_id, only_type=Product)
+        pk = cls.get_global_id_or_error(product_id, only_type=Product)
 
         try:
             product = models.Product.objects.prefetched_for_webhook().get(pk=pk)
@@ -1517,7 +1516,7 @@ class ProductVariantReorder(BaseMutation):
         operations = {}
 
         for move_info in moves:
-            _type, variant_pk = from_global_id_or_error(
+            variant_pk = cls.get_global_id_or_error(
                 move_info.id, only_type=ProductVariant, field="moves"
             )
 

@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Type, Union
 import graphene
 from django.core.exceptions import ValidationError
 from graphene import ObjectType
+from graphql.error import GraphQLError
 
 from ....core.utils import generate_unique_slug
 
@@ -108,13 +109,9 @@ def from_global_id_or_error(
     """
     try:
         _type, _id = graphene.Node.from_global_id(id)
-    except (binascii.Error, UnicodeDecodeError):
-        raise ValidationError(
-            {field: ValidationError(f"Couldn't resolve id: {id}.", code="not_found")}
-        )
+    except (binascii.Error, UnicodeDecodeError, ValueError):
+        raise GraphQLError(f"Couldn't resolve id: {id}.")
 
     if only_type and str(_type) != str(only_type):
-        raise ValidationError(
-            {field: ValidationError(f"Must receive a {only_type} id.", code="invalid")}
-        )
+        raise GraphQLError(f"Must receive a {only_type} id.")
     return _type, _id
