@@ -40,6 +40,10 @@ def resolve_customers(info, query, **_kwargs):
     return qs.distinct()
 
 
+def resolve_permission_group(id):
+    return auth_models.Group.objects.filter(id=id).first()
+
+
 @traced_resolver
 def resolve_permission_groups(info, **_kwargs):
     return auth_models.Group.objects.all()
